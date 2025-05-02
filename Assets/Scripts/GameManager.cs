@@ -6,10 +6,12 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
 
+    public static GameManager Instance { get; private set; }
+
     [Header("Buttons")]
     [SerializeField] private Button shopButton;
     [SerializeField] private Button inventoryButton;
-    [SerializeField] private Button itemPrefabButton;
+    [SerializeField] private Button prefabButton;
 
     [Header("Panels")]
     [SerializeField] private GameObject shopPanel;
@@ -24,16 +26,32 @@ public class GameManager : MonoBehaviour
 
     [Header("ItemsContainer")]
     [SerializeField] private RectTransform shopItemsContainer;
+    [SerializeField] private RectTransform inventoryItemsContainer;
 
     [Header("Shop Items")]
-    [SerializeField] private List<ElementalItemData> elementalItemData;
+    [SerializeField] private List<ElementalShopItemData> shopElementalItemData;
     [SerializeField] private GameObject shopItemPrefab;
 
+    [Header("Inventory Items")]
+    [SerializeField] private List<ElementalInventoryItemData> inventoryElementalItemData;
+    [SerializeField] private GameObject inventoryItemPrefab;
+
+
     private List<GameObject> currentShopItems = new List<GameObject>();
+    private List<GameObject> currentInventoryItems = new List<GameObject>();
 
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+
         shopPanel.SetActive(false);
         inventoryPanel.SetActive(false);
     }
@@ -76,7 +94,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (ElementType elementType in elementCategoryButtons)
         {
-            Button button = Instantiate(itemPrefabButton, shopButtonSpawnParent.transform);
+            Button button = Instantiate(prefabButton, shopButtonSpawnParent.transform);
             button.GetComponentInChildren<TextMeshProUGUI>().text = elementType.ToString();
 
             ElementType capturedType = elementType;
@@ -86,28 +104,32 @@ public class GameManager : MonoBehaviour
 
     void InventoryElementSpawnerButtons()
     {
-        foreach (ElementType item in elementCategoryButtons)
+        foreach (ElementType elementType in elementCategoryButtons)
         {
-            Button button = Instantiate(itemPrefabButton, inventoryButtonSpawnParent.transform);
-            button.GetComponentInChildren<TextMeshProUGUI>().text = item.ToString();
+            Button button = Instantiate(prefabButton, inventoryButtonSpawnParent.transform);
+            button.GetComponentInChildren<TextMeshProUGUI>().text = elementType.ToString();
+
+            ElementType capturedType = elementType;
+            button.onClick.AddListener(() => LoadInventoryItemsByType(capturedType));
 
         }
     }
 
-    public void LoadShopItemsByType(ElementType selectedType)
+    private void LoadShopItemsByType(ElementType selectedType)
     {
         ClearShopItems();
 
-        List<ElementalItemData> filteredItems = new List<ElementalItemData>();
-        foreach (ElementalItemData item in elementalItemData)
+        List<ElementalShopItemData> filteredItems = new List<ElementalShopItemData>();
+
+        foreach (ElementalShopItemData item in shopElementalItemData)
         {
-            if (item.elementType == selectedType)
+            if (item.shopElementType == selectedType)
             {
                 filteredItems.Add(item);
             }
         }
 
-        foreach (ElementalItemData item  in filteredItems)
+        foreach (ElementalShopItemData item in filteredItems)
         {
             GameObject newItem = Instantiate(shopItemPrefab, shopItemsContainer);
             currentShopItems.Add(newItem);
@@ -122,7 +144,58 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("Shop item prefab is missing ShopItemDisplay component!");
             }
         }
-       
+
+    }
+
+    private void LoadInventoryItemsByType(ElementType selectedType)
+    {
+        ClearInventoryItems();
+
+        List<ElementalInventoryItemData> filteredItems = new List<ElementalInventoryItemData>();
+
+        foreach (ElementalInventoryItemData item in inventoryElementalItemData)
+        {
+            if (item.inventoryElementType == selectedType)
+            {
+                filteredItems.Add(item);
+            }
+        }
+
+        foreach (ElementalInventoryItemData item in filteredItems)
+        {
+            GameObject newItem = Instantiate(inventoryItemPrefab, inventoryItemsContainer);
+            currentInventoryItems.Add(newItem);
+
+            InventoryItemDisplay itemDisplay = newItem.GetComponent<InventoryItemDisplay>();
+            if (itemDisplay != null)
+            {
+                itemDisplay.SetupItem(item);
+            }
+            else
+            {
+                Debug.LogError("Inventory item prefab is missing InventoryItemDisplay component!");
+            }
+        }
+    }
+
+    public void BuyItem(ElementalShopItemData itemData)
+    {
+        // Add item to inventory
+        ElementalInventoryItemData inventoryItem = new ElementalInventoryItemData
+        {
+            id = itemData.id,
+            inventoryElementType = itemData.shopElementType,
+            inventoryItemName = itemData.shopItemName,
+            inventoryItemType = itemData.shopItemType,
+            inventoryItemDescription = itemData.shopItemDescription,
+            isEquipped = false
+        };
+        inventoryElementalItemData.Add(inventoryItem);
+
+        if (inventoryPanel.activeSelf)
+        {
+            LoadInventoryItemsByType(inventoryItem.inventoryElementType);
+        }
     }
 
     private void ClearShopItems()
@@ -132,6 +205,15 @@ public class GameManager : MonoBehaviour
             Destroy(item);
         }
         currentShopItems.Clear();
+    }
+
+    private void ClearInventoryItems()
+    {
+        foreach (GameObject item in currentInventoryItems)
+        {
+            Destroy(item);
+        }
+        currentInventoryItems.Clear();
     }
 
 }

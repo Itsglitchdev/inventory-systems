@@ -149,7 +149,7 @@ GameObject:
   - component: {fileID: 7287097792306651705}
   - component: {fileID: 3397552930938699718}
   m_Layer: 5
-  m_Name: Button
+  m_Name: ButtonPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

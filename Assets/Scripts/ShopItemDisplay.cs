@@ -10,23 +10,23 @@ public class ShopItemDisplay : MonoBehaviour
     [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private Button buyButton;
 
-    private ElementalItemData itemData;
+    private ElementalShopItemData itemData;
 
-    public void SetupItem(ElementalItemData data)
+    public void SetupItem(ElementalShopItemData data)
     {
         itemData = data;
         
         if (itemNameText != null)
-            itemNameText.text = data.itemName;
+            itemNameText.text = data.shopItemName;
             
         if (typeText != null)
-            typeText.text = data.itemType.ToString();
+            typeText.text = data.shopItemType.ToString();
             
         if (effectText != null)
-            effectText.text = data.description;
+            effectText.text = data.shopItemDescription;
             
         if (priceText != null)
-            priceText.text = data.price.ToString();
+            priceText.text = data.shopItemPrice.ToString();
             
         if (buyButton != null)
         {
@@ -38,10 +38,9 @@ public class ShopItemDisplay : MonoBehaviour
     private void OnBuyButtonClicked()
     {
         // Here you would implement the purchase logic
-        Debug.Log($"Buying item: {itemData.itemName} for {itemData.price} coins");
+        Debug.Log($"Buying item: {itemData.shopItemName} for {itemData.shopItemPrice} coins");
         
-        // You might want to call a method on your GameManager or another manager class
-        // For example:
-        // FindObjectOfType<GameManager>().BuyItem(itemData);
+        // Example: Call the BuyItem method from the GameManager
+        GameManager.Instance.BuyItem(itemData);
     }
 }
