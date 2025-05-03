@@ -4,7 +4,7 @@ public enum ElementType
     Aqua,
     Terra,
     Aeris,
-    LuxUmbra
+    Lux
 }
 
 public enum ItemType

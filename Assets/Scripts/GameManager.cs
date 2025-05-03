@@ -3,6 +3,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[System.Serializable]
+public class ElementImageData
+{
+    public ElementType elementType;
+    public Sprite elementSprite;
+}
+
 public class GameManager : MonoBehaviour
 {
 
@@ -19,6 +26,9 @@ public class GameManager : MonoBehaviour
 
     [Header("ButtonSpawn")]
     [SerializeField] private ElementType[] elementCategoryButtons;
+
+    [Header("Element Images")]
+    [SerializeField] private ElementImageData[] elementImages;
 
     [Header("ButtonSpawnParent")]
     [SerializeField] private RectTransform shopButtonSpawnParent;
@@ -95,7 +105,23 @@ public class GameManager : MonoBehaviour
         foreach (ElementType elementType in elementCategoryButtons)
         {
             Button button = Instantiate(prefabButton, shopButtonSpawnParent.transform);
-            button.GetComponentInChildren<TextMeshProUGUI>().text = elementType.ToString();
+            Image buttonImage = button.GetComponent<Image>();
+            Sprite elementSprite = GetSpriteForElementType(elementType);
+            if (buttonImage != null && elementSprite != null)
+            {
+                buttonImage.sprite = elementSprite;
+            }
+            else
+            {
+                Debug.LogWarning($"Button image component or sprite is missing for element: {elementType}");
+            }
+
+            // Find and disable the TextMeshPro component
+            TextMeshProUGUI textComponent = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (textComponent != null)
+            {
+                textComponent.gameObject.SetActive(false);
+            }
 
             ElementType capturedType = elementType;
             button.onClick.AddListener(() => LoadShopItemsByType(capturedType));
@@ -107,7 +133,23 @@ public class GameManager : MonoBehaviour
         foreach (ElementType elementType in elementCategoryButtons)
         {
             Button button = Instantiate(prefabButton, inventoryButtonSpawnParent.transform);
-            button.GetComponentInChildren<TextMeshProUGUI>().text = elementType.ToString();
+            Image buttonImage = button.GetComponent<Image>();
+            Sprite elementSprite = GetSpriteForElementType(elementType);
+            if (buttonImage != null && elementSprite != null)
+            {
+                buttonImage.sprite = elementSprite;
+            }
+            else
+            {
+                Debug.LogWarning($"Button image component or sprite is missing for element: {elementType}");
+            }
+
+            // Find and disable the TextMeshPro component
+            TextMeshProUGUI textComponent = button.GetComponentInChildren<TextMeshProUGUI>();
+            if (textComponent != null)
+            {
+                textComponent.gameObject.SetActive(false);
+            }
 
             ElementType capturedType = elementType;
             button.onClick.AddListener(() => LoadInventoryItemsByType(capturedType));
@@ -176,6 +218,20 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("Inventory item prefab is missing InventoryItemDisplay component!");
             }
         }
+    }
+
+    private Sprite GetSpriteForElementType(ElementType elementType)
+    {
+        foreach (ElementImageData imageData in elementImages)
+        {
+            if (imageData.elementType == elementType)
+            {
+                return imageData.elementSprite;
+            }
+        }
+
+        Debug.LogWarning($"No sprite found for element type: {elementType}");
+        return null;
     }
 
     public void BuyItem(ElementalShopItemData itemData)
