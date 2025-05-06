@@ -116,13 +116,6 @@ public class GameManager : MonoBehaviour
                 Debug.LogWarning($"Button image component or sprite is missing for element: {elementType}");
             }
 
-            // Find and disable the TextMeshPro component
-            TextMeshProUGUI textComponent = button.GetComponentInChildren<TextMeshProUGUI>();
-            if (textComponent != null)
-            {
-                textComponent.gameObject.SetActive(false);
-            }
-
             ElementType capturedType = elementType;
             button.onClick.AddListener(() => LoadShopItemsByType(capturedType));
         }
@@ -144,12 +137,6 @@ public class GameManager : MonoBehaviour
                 Debug.LogWarning($"Button image component or sprite is missing for element: {elementType}");
             }
 
-            // Find and disable the TextMeshPro component
-            TextMeshProUGUI textComponent = button.GetComponentInChildren<TextMeshProUGUI>();
-            if (textComponent != null)
-            {
-                textComponent.gameObject.SetActive(false);
-            }
 
             ElementType capturedType = elementType;
             button.onClick.AddListener(() => LoadInventoryItemsByType(capturedType));
